@@ -79,12 +79,13 @@ def generate_benchmark_data(number_of_tuples):
     even_val = 2
     for i in range(number_of_tuples):
       unique1 = random.randrange(number_of_tuples)
-      unique2 = random.randrange(number_of_tuples)
       if (cache[unique2]):
-        while(chace[unique2]):
+        while(cache[unique2]):
           unique2 = random.randrange(number_of_tuples)
 
       cache[unique2] = 1 # Register this value is in table
+
+      unique2 = i
 
       two = i % 2
       four = i % 4
