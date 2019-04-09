@@ -2,83 +2,76 @@
 
 import random
 import string
+import math
 
-class Incrementer:
-    def __init__(self, low_value, high_value, increment_value):
-        self.current_value = low_value
-        self.low_value = low_value
-        self.high_value = high_value
-        self.increment_value = increment_value
+def compute_tailing_characters():
+  trailing_chars = ""
+  for i in range(5):
+    trailing_chars += "xxxxxxxx"
+  return trailing_chars
 
-    def get_value(self):
-        ret_val = self.current_value
-        self.current_value += self.increment_value
-        if self.current_value > self.high_value:
-            self.current_value = self.low_value
-        return ret_val
+def compute_cyclic_str_key(index):
+  mod_value = index % 4
+  return ''.join( [chr(65 + mod_value * 7)] * 7 )
 
 
-class uniquleNumber:
-    def __init__(self):
-        self.value = 0
+def compute_unique_str_key(unique_val):
+  """
+    This function is pulled from the Wisconsin Benchmark paper
+  """
+  unq = unique_val
+  key = ['A','A','A','A','A','A','A']
+  incr = 6
+  
+  while unq > 0:
+    remainder = unq % 26
+    key[incr] = chr(65 + remainder)
+    unq = math.floor(unq / 26)
+    incr -= 1
 
-    def outPut(self,number):
-        r =random.sample(range(number), 1)
-        self.value = ''.join(map(str, r))
-        return self.value
-     
+  return ''.join(key)
 
-class alpha():
-    def __init__(self):
-        self.alpha = 0
-
-    def random_alpha(self):
-        self.alpha = ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUV') for i in range(1))
-        return  self.alpha
-
-    def stringCyclicOne(self,start,end):
-        current_value = chr(start)+'xxxxxxxxxxxxxxxxxxxxxxxxx'+chr(start)+'xxxxxxxxxxxxxxxxxxxxxxxxx'+chr(start)
-        ret_val = current_value
-
-
-class CharIncrementer:
-    """ character incrementer """
-    def __init__(self,increaseValue):
-        """ constructor """
-        self.counter = Incrementer(65, 86, increaseValue)
-
-    def get_value(self):
-        """ return incremeter value"""
-        return chr(self.counter.get_value())
-
-def printOutTableOne():
-    test = uniquleNumber()
-    two = Incrementer(0, 1, 1)
-    four = Incrementer(0,3,1)
-    ten = Incrementer(0,9,1)
-    twenty = Incrementer(0,19,1)
-    hundred = Incrementer(0,99,1)
-    thousand =Incrementer(0,999,1)
-    twothous = Incrementer(0,1999,1)
-    fivethous = Incrementer(0,4999,1)
-    tenthous =Incrementer(0,9999,1)
-    oddonehund = Incrementer(1,99,2)
-    evenonehund = Incrementer(2,100,2)
-    stringu1 = alpha()
-
-    char_counter1 = CharIncrementer()
-    char_counter2 = CharIncrementer()
-    char_counter3 = CharIncrementer()
-    un = test.outPut(100)
-    for i in range(0, 2):
-        #print(f"{un},{i},{two.get_value()},{four.get_value()},{ten.get_value()},{twenty.get_value()},{hundred.get_value()},{thousand.get_value()},{twothous.get_value()},{fivethous.get_value()},{tenthous.get_value()},{oddonehund.get_value()},{evenonehund.get_value()},{stringu1.random_alpha()}xxxxxxxxxxxxxxxxxxxxxxxxx{stringu1.random_alpha()}xxxxxxxxxxxxxxxxxxxxxxxxx{stringu1.random_alpha()}\n")
-        #print(f'{stringu1.random_alpha()}xxxxxxxxxxxxxxxxxxxxxxxxx{stringu1.random_alpha()}xxxxxxxxxxxxxxxxxxxxxxxxx{stringu1.random_alpha()}')
-        c_1 = char_counter1.get_value()
-        for j in range(0, 22):
-            c_2 = char_counter2.get_value()
-            for k in range(0, 22):
-                c_3 = char_counter3.get_value()
-                #print(f"{c_1}xx{c_2}xx{c_3}")
+def create_table_data_of_size(table_size):
     
-printOutTableOne()
+    unique_set = random.sample(range(table_size), table_size)
+    trailing_characters = compute_tailing_characters()
+    for incr in range(table_size):
+        unique1 = unique_set[incr]
+        unique2 = incr
+        two = unique1 % 2
+        four = unique1 % 4
+        ten = unique1 % 10
+        twenty = unique1 % 20
+        one_percent = unique1 % 100
+        ten_percent = unique1 % 10
+        twenty_percent = unique1 % 5
+        fifty_percent = unique1 % 2
+        unique3 = unique1
+        even_one_percent = one_percent * 2
+        odd_one_percent = one_percent * 2 + 1
 
+        ustr1 = compute_unique_str_key(unique1)
+        ustr2 = compute_unique_str_key(unique2)
+        str4 = compute_cyclic_str_key(incr)
+
+        print('{u1}\t{u2}\t{two}\t{four}\t{ten}\t{twenty}\t{one_p}\t{ten_p}\t{tw_p}\t{fi_p}\t{u3}\t{e_o}\t{o_o}\t{ustr1}\t{ustr2}\t{str4}'.format(
+          u1 = unique1,
+          u2 = unique2,
+          two = two,
+          four = four,
+          ten = ten,
+          twenty = twenty,
+          one_p = one_percent,
+          ten_p = ten_percent,
+          tw_p = twenty_percent,
+          fi_p = fifty_percent,
+          u3 = unique3,
+          e_o = even_one_percent,
+          o_o = odd_one_percent,
+          ustr1 = ustr1 + trailing_characters,
+          ustr2 = ustr2 + trailing_characters,
+          str4 = str4 + trailing_characters
+        ))
+
+
+create_table_data_of_size(1000)
