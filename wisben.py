@@ -48,6 +48,11 @@ def compute_unique_str_key(unique_val):
         unq = math.floor(unq / 26)
         incr -= 1
 
+    # Creates the correct string,
+    # The alogrithm originally right aligns,
+    # then left justifies (i.e. reverse the list
+    # from its reversed state)
+    key.reverse()
     return ''.join(key)
 
 
