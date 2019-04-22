@@ -1,33 +1,46 @@
 # CS487-DB-Generator
-##DB generator implementation of Wisconsin Benchmark
+## DB generator implementation of Wisconsin Benchmark
 
-Here is where we will draft the desgin document.
-
-Purpose of this document is have a reference of the steps that must be taken to implement a program which produces a vaild Wisconsin Benchmark schema.
-
-The following document will use Python as the primary language, and where applicable, will use psuedo-code with a syntax similar to python.
-
-# Relations
+Authors: Arron Wang & Brent Daniels-Soles
 
 ## Overview
 
+Here is where we will draft the desgin document.
+
+Purpose of this document is have a reference of the steps taken to implement a program which produces a vaild Wisconsin Benchmark schema, and details what the data looks like inside a database. For the initial upload of data, a Postrgres instance on a local machine was used. Once we start to benchmark, we will use the databases detailed in the 'Environment' section of this paper.
+
+The following document uses Python as the primary language, and where applicable, will use psuedo-code with a syntax similar to python.
+___
+## Implementation Notes
+
 As stated in section 2.1.1 of the Wisconsin Benchmark paper, the original benchmark has three relations: ONEKTUP, TENKTUP1 and TENKTUP2. Their differences are as follows:
 
-* ONEKTUP, means there are 1,000 tuples in a table
-* TENKTUP1, TENKTUP2 have 10,000 respectively
+* ONEKTUP, means there are 1,000 tuples in a table (in this paper as onektup)
+* TENKTUP1, TENKTUP2 have 10,000 respectively (in this paper as tenktup1 and tenktup2)
 
 Where they each are the same is in the type of data that lives in the table, which is as follows:
 
 * 13 integer attributes (where an integer is 4 bytes)
 * 3 52-byte strings
 
-### Environment
-We will use two different relation database to do the performance comparison
-* MYSQL
+We were able to fufill these requirments as you see later on the in the paper.
+___
+## Databse Environments
+
+We will use three different relation database to do the performance comparison, they consist of the following:
+
+* MySQL
 * Postgresql
+* Cloud option of Google CloudSQL
 
+MySQL and Postres, because they are available for free (yay, open source!), will be hosted on two different local machines with differing hardware and operating systems. The first machine is a Microsoft Surface Book and the second a Macbook Pro. Having these two systems, with two different operating systems will allow us to see which hardware/os is better able to run the database isntances.
 
-#### Schema Definition
+In addition, we will be utilizing a cloud based solution, for the purposes of seeing what performance implicaitons a cloud provider may have, and give an idea of what queries will look like "in the real world". The main reason for choosing this system, is to see what query execution on a cloud provider looks like, and to see if there are any performance increases, as well as possible increases in developer experience in the process of development. 
+
+Our approach should highlight some of the differnece between local development and deployed database solutions, and our hypothesis is: in general the cloud solution will be more consistent with reads/writes than local instances of the databases. It will help us see how different local development is vs. non local, and see differences between some of the most popular open sources databases available. 
+
+___
+## Schema Definition
 
 Note: This is copied directly from the Wisconsin Benchmark paper.
 
@@ -52,62 +65,66 @@ CREATE TABLE TUP
   string4   char(52) NOT NULL,            # ""
 )
 ```
-#### String definition
 
-The string to be used in each of the the string attributes of the schema is:
+When creating each of the tables initially in Postgres, this is the schema that was used for each of three tables taht are needed: onektup, tenktup1, tenktup2.
 
-```$xxxxxxxxxxxxxxxxxxxxxxxxx$xxxxxxxxxxxxxxxxxxxxxxxx$```
+### Schema in Action
 
-Where the `$` will be replaced by an uppercase character in the range of A..V
+We used this schema provided to create each of the tables: onektup, tenktup1, tenktup3. Each of the tables were painless to implement, since they have the same structure for each of them. Once we had generated the data, we could copy the values generated into the tables in the database. 
 
-### Function Desgin
+The following are some images of insered data from a .csv into each of the respective tables:
 
-Goal: to see if we can fit all of this computation into a single loop.
+* Onektup (One thousand tuples: in the repo as onektup.csv)
+![](images/onektup_file_vs_table.png)
+Note: the top image pane shows the output from the program, and the reflected values put into the database
 
-Known metrics:
+* tenktup1 (Ten Thousand tuples: in the repo as tenktup1.csv)
+![](images/tenktup1_file_vs_table.png)
+Note: the top image pane shows the output from the program, and the reflected values put into the database
 
-* unique2 MUST be uniqe. This will require some sort of memoization. Solutions can involve utilizing an array and flipping a bit at an index of a number that has been computed. For example, if 100 was computed as a value of unique2, then cache[100] == 1, whereas if 80 had not been computed, then cache[80] == 0.
+* tenktup2 (Ten Thousand tuples: in the repo as tenktup2.csv)
+![](images/tenktup1_file_vs_table.png)
+Note: the top image pane shows the output from the program, and the reflected values put into the database
 
-* We know which indicies of the strings will need to be replaced, these will be: 0, 25, and 51
 
-* We can utilize the modulo operator for each of the Cyclic integers, where the iterator will be set agains the modulus of targe range. For example, the `hundred` will be derived with: i % 99
+For each of them, you can see there are unique values for both the unique columns, which is a requirement of the bench mark:
+![](images/distinct_values.png)
 
-```python
-import random
+___
+## Program Desgin
 
-# Inputs: number of tuples (rows) we want to
-#   generate.
-def generate_benchmark_data(number_of_tuples):
-    # Need to keep track of wich values have been
-    # computed and output
-    cache = [0] * number_of_tuples
-    odd_val = 1
-    even_val = 2
-    for i in range(number_of_tuples):
-      unique1 = random.randrange(number_of_tuples)
-      if (cache[unique2]):
-        while(cache[unique2]):
-          unique2 = random.randrange(number_of_tuples)
+Requirements to run the program:
+  1. python3 must be installed
 
-      cache[unique2] = 1 # Register this value is in table
+That's it!
 
-      unique2 = i
+The program to generate the .csv data is a Python script invoked in the following ways:
 
-      two = i % 2
-      four = i % 4
-      ten = i % 10
-      twenty = i % 20
-      hundred = i % 100
-      thousand = i % 1000
-      twothous = i % 2000
-      fivethous = 1 % 5000
-      tenthous = i % 10000
-      odd_one_hun = odd_val
-      odd_val += 2
-      # ternary to reset odd_val
-      even_one_hun = even_val
-      even_val += 2
-      # ternary to reset even_val
-      # String computations
+1. `$> python3 wisben.py -t 1000 -f data.csv`
 
-```
+~ or ~
+
+2. `$> ./wisben.py -t 1000 -f data.csv`
+
+If the `./` method does not work, please make sure you are giving the script permissino to execute or try to pass the program to the python3 command line argument.
+
+### Arguments
+
+The program takes two argument: number of tuples and the filen name you would like for the data. You can pass each of the flages like so:
+
+* `-f [filename]` or `--file [filename]`
+* `-t [number of tuples`] or `--tuples [number of tuples]`
+
+Each of these arguments is required, -f being a string and -t being an int.
+
+### Time complexity
+
+We have designed our program to have a runtime of `O(n)`, which means even on large data sets with 10000+ rows, the file specified in the command line arguments on a modern machine should be fairly quick. In a test, generating a file with 1,000,000 tuples took only a few seconds (still on the the best, but quick for python).
+
+Some performance optimizations could be made, however, they are small and help with the readability of the code. These take the form of small `O(n)` loops.
+
+### Nitty Gritty
+
+As you will see by looking at the source code, our main chunck of computation is house in a for loop which iterates over the range specified in the `--tuples` argument provided to the program. Once the arguments have been parsed, they are passed to single function which calls the big for loop for generating each of the tuples. Once the tuples have been loaded up into a buffer (an array in this case), we open the specified file (creating it, if it doesn't exist), and then proceed to write out each index in the array to a corresponding line the file.
+
+In order to write out to a file, the standard library function `open()` is used, which we pass a `w+` flag to indicate we would like to write into the file, creating it if it does not exists (and if it exists, it will overwrite the current file). 
