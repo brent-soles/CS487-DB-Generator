@@ -5,11 +5,9 @@ Authors: Arron Wang & Brent Daniels-Soles
 
 ## Overview
 
-Here is where we will draft the desgin document.
+Purpose of this document is have a reference of the steps taken to implement a program which produces a vaild Wisconsin Benchmark data set and give some insight into what the data looks like inside a database. For the initial upload of data, a Postrgres instance on a local machine was used. Once we start to benchmark, we will use the databases detailed in the 'Environment' section of this paper.
 
-Purpose of this document is have a reference of the steps taken to implement a program which produces a vaild Wisconsin Benchmark schema, and details what the data looks like inside a database. For the initial upload of data, a Postrgres instance on a local machine was used. Once we start to benchmark, we will use the databases detailed in the 'Environment' section of this paper.
-
-The following document uses Python as the primary language, and where applicable, will use psuedo-code with a syntax similar to python.
+The following document uses Python as the programming language, and where applicable, will use psuedo-code with a syntax similar to Python.
 ___
 ## Implementation Notes
 
@@ -23,21 +21,22 @@ Where they each are the same is in the type of data that lives in the table, whi
 * 13 integer attributes (where an integer is 4 bytes)
 * 3 52-byte strings
 
-We were able to fufill these requirments as you see later on the in the paper.
+We were able to fufill these requirments as you see later on the in the paper. Below are the details of the schema, as well as some screen shots of what the data looks like when input into the database.
+
 ___
 ## Databse Environments
 
-We will use three different relation database to do the performance comparison, they consist of the following:
+We will use three different relational databases to conduct the performance comparisons. The databses we will be using are:
 
 * MySQL
 * Postgresql
 * Cloud option of Google CloudSQL
 
-MySQL and Postres, because they are available for free (yay, open source!), will be hosted on two different local machines with differing hardware and operating systems. The first machine is a Microsoft Surface Book and the second a Macbook Pro. Having these two systems, with two different operating systems will allow us to see which hardware/os is better able to run the database isntances.
+MySQL and Postres were chosen because they are available for free (yay, open source!) and are quite popular for commercial applications. The MySQL and Postgres instances will be hosted on two different local machines with differing hardware and operating systems. The first machine is a Microsoft Surface Book and the second a Macbook Pro. Having these two systems, with two different operating systems will allow us to see which hardware/os is better able to run the database isntances.
 
-In addition, we will be utilizing a cloud based solution, for the purposes of seeing what performance implicaitons a cloud provider may have, and give an idea of what queries will look like "in the real world". The main reason for choosing this system, is to see what query execution on a cloud provider looks like, and to see if there are any performance increases, as well as possible increases in developer experience in the process of development. 
+In addition, we will be utilizing a cloud based solution, for the purposes of seeing what performance implicaitons a cloud provider may have, and give an idea of what queries will look like "in the real world". The main reason for choosing this system, is to see what query execution on a cloud provider looks like, and to see if there are any performance increases, as well as possible increases in developer experience in the process of development. In the cloud, Linux is the OS of choice, so we will be using Linux for the query interface for Google CloudSQL.
 
-Our approach should highlight some of the differnece between local development and deployed database solutions, and our hypothesis is: in general the cloud solution will be more consistent with reads/writes than local instances of the databases. It will help us see how different local development is vs. non local, and see differences between some of the most popular open sources databases available. 
+Our approach should highlight some of the differneces between local development and deployed database solutions. Our hypothesis is, in general the cloud solution will be more consistent with reads/writes than local instances of the databases. It will help us see how different local development is vs. non local, and see differences between some of the most popular open sources databases available. 
 
 ___
 ## Schema Definition
@@ -49,32 +48,34 @@ CREATE TABLE TUP
 (
   unique1   integer NOT NULL,             # Random 0..9999
   unique2   integer NOT NULL PRIMARY KEY, # Random 0..9999
-  two       integer NOT NULL,             # Cyclic 0..1
-  four      integer NOT NULL,             # Cyclic 0..3
-  ten       integer NOT NULL,             # Cyclic 0..9
-  twenty    integer NOT NULL,             # Cyclic 0..19
-  hundred   integer NOT NULL,             # Cyclic 0..99
-  thousand  integer NOT NULL,             # Cyclic 0..999
-  twothous  integer NOT NULL,             # Cyclic 0..1999
-  fivethous integer NOT NULL,             # Cyclic 0..4999
-  tenthous  integer NOT NULL,             # Cyclic 0..9999
-  odd100    integer NOT NULL,             # Cyclic 1..99, where n % 3 == 0
-  even100   integer NOT NULL,             # Cyclic 2..100, where n % 2 == 0
+  two       integer NOT NULL,             # unique1 mod 2
+  four      integer NOT NULL,             # unique1 mod 4
+  ten       integer NOT NULL,             # Cunique1 mod 10
+  twenty    integer NOT NULL,             # unique1 mod 20
+  hundred   integer NOT NULL,             # unique1 mod 100
+  thousand  integer NOT NULL,             # unique1 mod 1000
+  twothous  integer NOT NULL,             # unique1 mod 2000
+  fivethous integer NOT NULL,             # unique1 mod 5000
+  tenthous  integer NOT NULL,             # unique1 mod 10000
+  odd100    integer NOT NULL,             # hundred * 2
+  even100   integer NOT NULL,             # hundred * 2 + 1
   stringu1  char(52) NOT NULL,            # See below
   stringu2  char(52) NOT NULL,            # ""
-  string4   char(52) NOT NULL,            # ""
+  string4   char(52) NOT NULL,            # cyclic
 )
 ```
 
 When creating each of the tables initially in Postgres, this is the schema that was used for each of three tables taht are needed: onektup, tenktup1, tenktup2.
 
+One thing to note: the "scalable" version of the schema calls for an extra field 'unique3', which is the same value s unique1. In the future the schema will be updated to include this, and have the info more closely align with the "scalable" version. 
+
 ### Schema in Action
 
-We used this schema provided to create each of the tables: onektup, tenktup1, tenktup3. Each of the tables were painless to implement, since they have the same structure for each of them. Once we had generated the data, we could copy the values generated into the tables in the database. 
+We used this schema provided to create each of the tables: onektup, tenktup1, tenktup3. Each of the tables were painless to implement, since they have the same structure. Once we had generated the data, we could copy the values generated from the csv's into the tables located in the database.
 
 The following are some images of insered data from a .csv into each of the respective tables:
 
-* Onektup (One thousand tuples: in the repo as onektup.csv)
+* onektup (One thousand tuples: in the repo as onektup.csv)
 ![](images/onektup_file_vs_table.png)
 Note: the top image pane shows the output from the program, and the reflected values put into the database
 
@@ -128,3 +129,6 @@ Some performance optimizations could be made, however, they are small and help w
 As you will see by looking at the source code, our main chunck of computation is house in a for loop which iterates over the range specified in the `--tuples` argument provided to the program. Once the arguments have been parsed, they are passed to single function which calls the big for loop for generating each of the tuples. Once the tuples have been loaded up into a buffer (an array in this case), we open the specified file (creating it, if it doesn't exist), and then proceed to write out each index in the array to a corresponding line the file.
 
 In order to write out to a file, the standard library function `open()` is used, which we pass a `w+` flag to indicate we would like to write into the file, creating it if it does not exists (and if it exists, it will overwrite the current file). 
+
+One nuance of the program, is it generates a random table of data each time it is run. What this means, is if I run the program 3 times, for the same number of tuples, the results will be different each time. In the long run, this may impact performance of queries.
+
