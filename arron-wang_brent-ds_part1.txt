@@ -1,0 +1,10 @@
+CS487 - Project part 1 submission.
+
+Authors:
+- Arron Wang
+- Brent Daniels-Soles
+
+Github Url:
+- https://github.com/brent-soles/CS487-DB-Generator
+
+Readme is in the repo.
