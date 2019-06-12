@@ -39,7 +39,8 @@ WHERE (TENKTUP1.unique1 = TENKTUP2 .unique1) AND (TENKTUP1.unique1<4532)
 
 ### Query 5
 ```sql
-SELECT TENKTUP1.unique2
-FROM TENKTUP1 JOIN 1MILTUP on TENKTUP1.unique2 = ONEMILTUP.string4
-ORDER_BY TENKTUP.unique2
+SELECT tenktup1.unique2, COUNT(*)
+FROM tenktup1 JOIN tenktup2 on tenktup1.unique2 = tenktup2.odd100
+GROUP BY tenktup1.unique2
+ORDER BY tenktup1.unique2;
 ```
