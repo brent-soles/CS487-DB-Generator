@@ -106,6 +106,7 @@ Performance metrics this query aims to test:
 * Measure raw efficiency of plan, due to an index not having an effect when > 10% of data is needed to be searched. 
 
 Results:
+
 | Times| Postgres  |   MySQL   |
 |------|:---------:|:---------:|
 | low  |  .862ms   |  .3ms     |
