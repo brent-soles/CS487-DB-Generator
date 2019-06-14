@@ -90,11 +90,6 @@ There are three tables that we use in these tests, each being generated using th
 Originally, the benchmark did not exceed 10,000 relations for any given table, and did not included the ONEMILTUP as part of the benchmark. The reason we decided to include this table, was to mock a system which deals with amount of data one would see in industry. 
 
 ---
-## Performance Experiment Hypothesis
-
-Our hypothesis for the smaller tests, is the two system will perform on par with one another. However, when we start to test `JOIN`'s, we hypothesize Postgres will generally be more performant than MySQL, due to the fact MySQL uses only Nested Loop Joins.
-
----
 ### Experiment Queries
 Below are each of the queries
 
