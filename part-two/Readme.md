@@ -6,10 +6,10 @@
 
 Given our initial experiments with MySQL and Postgres, it was decided the best course of action would be to compare MySQL and Postgres for the benchmark segment of this project. The reason being, is we wanted to structure our benchmark experiments to give an idea of how each of the respective systems perfrom out of the box.
 
-The reason for leaving each system in their default configuration is because of the fact most side and hobby projects, and possibly startups, use these systems in their default state rather than fine tuning it before they beginning to build their applications. With our benchmark, we hope to examine which system may be better for building a performant application withouth having to adjust any settings. In addition, our benchmark aims to highlight the consistency of each platform, as each query in the benchmark will be run mulitple times.
+The reason for leaving each system in their default configuration is because of the fact most side and hobby projects, and possibly startups, use these systems in their default state rather than fine tuning it before they beginning to build their applications. With our benchmark, we hope to examine which system may be better for building a performant application withouth having to adjust any settings. In addition, our benchmark aims to test the consistency of each platform by running each test in the benchmark multiple times.
 
 ## Hypothesis
-The hypothesis we have for these experiments is for MySQL and Postrgres to have similar performance for the simpler queries of the benchmark. However, once they systems are executing `JOIN` statements, we think Postgres will be more performant than MySQL, due to MySQL only implementing Nested Loop Joins (See 'Join' in 'System Research' section for more information).
+The hypothesis we have for the experiments in this benchmark is: MySQL and Postrgres should have similar performance for the simpler queries of the benchmark. However, once they systems are executing `JOIN` statements, we think Postgres will be more performant than MySQL, due to MySQL only implementing nested loop joins (See 'Join' in 'System Research' section for more information).
 
 ---
 # System Research
@@ -21,11 +21,11 @@ Below are the respective links to each of the documentation pages:
 
 For each of the databases, we tried to dig into the features which would be involved in our tests.
 
-The subsections represent how indicies, projection, joins, and the buffer pool are used in each of the systems.
+The subsections represent how indicies, joins, and the buffer pool are used in each of the systems.
 
 ## Indices
 #### Postgres
-Posgres has a few different index 'types' which can be utilized. They are as follows:
+Posgres has a few different index 'types' (types in this case referring to data structures) which can be utilized in relations. They are as follows:
 * B-Tree (more commonly known as B+ Tree)
 * Hash Indices
 * GiST (Acronym for 'Generalized Search Tree')
@@ -45,21 +45,19 @@ Again, in our experiments, we used the 'B-Tree' as it is one of the more commone
 #### Postgres
 During research, we were unfruitful in finding specifics about the types of `JOIN`'s Postgres implements. However, we were able to find information that details (at a high level) how a query is constructed. 
 
-At a high level, Postgres constructs queries based off of the indices currently defined on the relation, and from there, conducts a near-exhaustive search of various query plans in order to derive the best one. However, the near-exhaustive search is only conducted when querying smaller amounts of data, as there can be huge, system-wide ramifications when performing a near-exhaustive search on large data sets. When joining big data together, Postgres uses what is called a “genetic algorithm” to attempt to discern the best query plan for large/join heavy operations, these optimizations are mainly based upon heuristics which are determined by a form of randomization.
+At a high level, Postgres constructs queries based off of the indices currently defined on the relation, and from there, conducts a near-exhaustive search of various query plans in order to derive the best one. However, the near-exhaustive search is only conducted when querying smaller amounts of data, as there can be huge, system-wide ramifications when performing a near-exhaustive search on large data sets. When joining big data together, Postgres uses what is called a “genetic algorithm” to attempt to discern the best query plan for large/join heavy operations. The optimizations made for computationally expensive queries are mainly based upon heuristics which are determined by a form of randomization.
 
 #### MySQL
-In the documentation for MySQL, specifically in the introductary chapter (1.3.2), it is specified MySQL utilizes an optimized nested loop join algorithm. No other type of `JOIN` (as far as I know), is implemented in MySQL (besides a variant of the Nested Loop Join). 
+In the documentation for MySQL, specifically in the introductary chapter (1.3.2), it is specified MySQL utilizes an optimized nested loop join algorithm and another variant of the nested loop join. No other type of `JOIN` algorithm(for example: Hash Join), is implemented in MySQL.
 
-After further digging, MySQL currently implements two types of the Nested Loop Join algorithm, they are:
+Currently, the two types of nested loop joins MySQL implements are:
 
 * Nested Loop Join
 * Block Nested Loop Join
 
 The Nested Loop Join is pretty straightforward: for each row in TableA, loop over TableB and see if the join predicate is satisfied. If the join predicate is satisfied, then add the combination of each of the rows to the output.
 
-The Block Nested Loop Join is similar to the Nested Loop Join, however, works a bit differently, What Block Nested Loop Join does, is once a row is read from the outer table, it is sent to a buffer called the 'join_buffer'. The 'join_buffer' acts as an in memory cache of each row seen for a given `JOIN` query. This prevents the DBMS from having to constantly make calls to the buffer pool/Disk Manager, and allows for the query engine to access the buffer for rows that have already been seen. Given the example above with TableA and TableB: 
-
-For each row in TableA, TableB is looped over and checked against the join predicate. If the join predicate is satisfied, the combination of the rows is added to the output. From there, the row in TableA and TableB are added to the join buffer. On the next pass, the query engine will check if the row needed is in the 'join_buffer' and if so, grab the row data from the buffer. If not, it will need to make a call to the system to grab that row off disk. This is then repeated for the remainder of the algorithm. In short, what the Block Nested Loop Join aims to do is make accessing each row have a lower overhead than making calls to the Disk Manager/Buffer pool. 
+The Block Nested Loop Join is similar to the Nested Loop Join, however, works a bit differently, What Block Nested Loop Join does, is once a row is read from the outer table, it is sent to a buffer called the 'join_buffer'. The 'join_buffer' acts as an in-memory cache of each row seen for a given `JOIN` query. This prevents the DBMS from having to constantly make calls to the buffer pool/Disk Manage, and allows for the query engine to access the buffer for rows that have already been seen. Given the example above with TableA and TableB: for each row in TableA, TableB is looped over, however, TableB is in the 'join_buffer', so the access to each row is already in memory. This makes accessing each row have a lower overhead, instead of constantly making calls to the Disk Manager/Buffer pool for rows that have already been seen. 
 
 
 ## Buffer Pools
@@ -68,10 +66,10 @@ For this section, I reference the following articles:
 
 * Postgres buffer manager: http://www.interdb.jp/pg/pgsql08.html
 
-The Postgres buffer pool is constructed from what are called ‘slots’. A slot is the equivalent of a page in any other DBMS. Each slot holds 8KB of data; the same amount as a page in memory. Once data has been loaded into a slot in the buffer pool, the algorithm that manages which pages are evicted, is the clock algorithm. In addition when Postgres detects it is set to read large amounts of data, the system will allocate a Ring buffer on the side (basically an on-demand small amount of memory to store temporary data) in order to improve buffer performance.
+The Postgres buffer pool is constructed from what are called ‘slots’. A slot is the equivalent of a page in any other DBMS. Each slot holds 8KB of data; the same amount as a page in memory. Once data has been loaded into a slot in the buffer pool, the algorithm that manages which pages are evicted, is the clock algorithm. In addition when Postgres detects it is set to read large amounts of data, the system will allocate a Ring buffer on the side (basically an on-demand small amount of data to store temporary data) in order to improve buffer performance.
 
 #### MySQL
-Digging through the MySQL docs, we were unable to land on a definite answer for the default size of pages or the default size of memory MySQL is allocated. The docs mentioned this aspect is left up to user discretion. Despite this, the docs go on to detail MySQL uses a variation of the Least Recently Used algorithm. The LRU algorithm employed by MySQL uses a head and tail pointer to memory to track older/inactive pages not really used, and newer/active pages, respectively. Everything the the ‘old’ list is candidate for eviction when a need arises.
+Digging through the MySQL docs, we were unable to land on a definite answer for the default size of pages or the default size of memory MySQL is allocated. The docs mentioned this aspect is left up to user discretion. Despite the documentation being vauge about the storage size, the docs go on to detail MySQL uses a variation of the Least Recently Used algorithm in order to determine which pages will be evicted from the buffer pool. The LRU algorithm employed by MySQL uses a head and tail pointer to track older/inactive pages and newer/active pages, respectively. Everything the the ‘old’ list is candidate for eviction when a need for space arises.
 
 --- 
 # Performance Experiment Design
@@ -89,18 +87,17 @@ There are three tables that we use in these tests, each being generated using th
 * TENKTUP2 (10,000 rows of data)
 * ONEMILTUP (1,000,000 rows of data)
 
-Originally, the benchmark did not exceed 10,000 rows of data, and by implication did not include the ONEMILTUP as part of the benchmark. The reason we decided to include this table, was to mock a table of a system which deals with an amount of data/rows one would see in industry. 
+Originally, the benchmark did not exceed 10,000 rows of data, and did not included the ONEMILTUP as part of the benchmark. The reason we decided to include this table, was to mock a system which deals with amount of data one would see in industry. 
 
 ---
-## Experiment Queries
+## Performance Experiment Hypothesis
 
-### Testing methods
-For each of the queries listed below, we used the following steps to get the performance data listed below. The steps are:
-1. Run each query 5 times
-2. Drop the slowest/fastest times for the given query*
-3. Display the low/mid/high range of time and the average of those three times
+Our hypothesis for the smaller tests, is the two system will perform on par with one another. However, when we start to test `JOIN`'s, we hypothesize Postgres will generally be more performant than MySQL, due to the fact MySQL uses only Nested Loop Joins.
 
-> \*Some of the query's contain a footnote. This footnote is to give indication of queries ran for systems which had odd behavior for a given query run.
+---
+### Experiment Queries
+Below are each of the queries
+
 
 #### Query 1 - Basic SELECT
 ```sql
@@ -195,12 +192,12 @@ Results:
 
 
 
-#### Query 5
+#### Query 5 - JOIN With Small & Large tables + GROUP/SORT + Aggregate
 ```sql
-SELECT tenktup1.unique2, COUNT(*)
-FROM tenktup1 JOIN onemiltup on tenktup1.unique2 = onemiltup.odd100
-GROUP BY tenktup1.unique2
-ORDER BY tenktup1.unique2;
+SELECT TENKTUP1.unique2, COUNT(*)
+FROM TENKTUP1 JOIN ONEMILTUP on TENKTUP1.unique2 = ONEMILTUP.odd100
+GROUP BY TENKTUP1.unique2
+ORDER BY TENKTUP1.unique2;
 ```
 
 Performance metrics this query aims to test:
