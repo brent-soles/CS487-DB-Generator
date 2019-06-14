@@ -213,4 +213,12 @@ Results:
 
 > Note: For MySQL, the slows was the first which took 2.92 seconds to complete, whereas Postgres' slowest was 4.724ms in the last round. 
 
+### Performance Section Conclusion
+
+For smaller queries MySQL does outperform Posgres by a decent margin (~.5-.6ms), which is what we hypothesized would happen. However, where we were off slightly on our hypothesis, is MySQL being less performant for `JOIN` operations. While MySQL did have some slow queries for larger sets of data, the `JOIN` operation proved to be very quick once relations were loaded into the join_buffer.
+
 ## Lessons Learned
+
+One of the big lessons learned throught this portion of the project, has been critically analyzing a DBMS as a whole rather than taking a system such as Postgres or MySQL at face value. Part of the analysis process was identifying each system's tradeoffs. For instance, a tradeoff with MySQL is the potential to have occasional long running queries at the benefit of a large portion of queries executing efficiently (less query execution consistency). In comparison, a tradeoff with Postgres would be having consistently slower queries, but having each of those querys execute in a fairly consistent manner.
+
+Finally, we learned that when it comes to building a performant application, it is about using the right tool for the right job. If speed is necessary, use a DBMS which is know to be performant. If consistency and resiliance is desired for your application, choose one which will fit that need, rather than trying to get another technology to fit into a use case it was not designed for.
