@@ -116,6 +116,9 @@ Results:
 
 
 
+
+
+
 #### Query 2
 ```sql
 SELECT two, ten, stringu1 
@@ -136,10 +139,14 @@ Results:
 | avg: |  .924ms   |  .3ms     |
 
 
+
+
+
+
 #### Query 3
 ```sql
 SELECT * 
-FROM TENKTUP1, onemiltup 
+FROM TENKTUP1, ONEMILTUP
 WHERE (TENKTUP1.unique2 = ONEMILTUP.unique2);
 ```
 
@@ -162,8 +169,8 @@ Results:
 
 #### Query 4
 ```sql
-SELECT * FROM TENKTUP1, onemiltup 
-WHERE (TENKTUP1.unique1 = onemiltup .unique1) AND (TENKTUP1.unique1<4532)
+SELECT * FROM TENKTUP1, ONEMILTUP 
+WHERE (TENKTUP1.unique1 = ONEMILTUP.unique1) AND (TENKTUP1.unique1<4532)
 ```
 
 Results:
