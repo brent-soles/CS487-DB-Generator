@@ -87,7 +87,7 @@ There are three tables that we use in these tests, each being generated using th
 * TENKTUP2 (10,000 rows of data)
 * ONEMILTUP (1,000,000 rows of data)
 
-Originally, the benchmark did not exceed 10,000 relations for any given tables, and did not included the ONEMILTUP as part of the benchmark. The reason we decided to include this table, was to mock a system which deals with amount of data one would see in industry. 
+Originally, the benchmark did not exceed 10,000 relations for any given table, and did not included the ONEMILTUP as part of the benchmark. The reason we decided to include this table, was to mock a system which deals with amount of data one would see in industry. 
 
 ---
 ## Performance Experiment Hypothesis
