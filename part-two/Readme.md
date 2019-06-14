@@ -73,25 +73,46 @@ Digging through the MySQL docs, we were unable to land on a definite answer for 
 ## Performance Experiment Design
 ### Overview
 
+For each of the tests, we wanted to see how the systems would perform for small, medium and large sets of data. Given some of the insights gained from the class, our queries aim to do so. We first start off simple with a basic `SELECT` statement, and then move into testing how each of the systems perfrom with different `JOIN` queries.
+
 ---
 ## Data Used In Tests
+
+There are three tables that we use in these tests, each being generated using the guidelines set forth in the Wisconsin Benchmark paper. The following tables are:
+
+* TENKTUP1 (10,000 rows of data)
+* TENKTUP2 (10,000 rows of data)
+* ONEMILTUP (1,000,000 rows of data)
+
+Originally, the benchmark did not exceed 10,000 rows of data, and did not included the ONEMILTUP as part of the benchmark. The reason we decided to include this table, was to mock a system which deals with above average amounts of data. We also wanted to see how each of the systems would perform, if there were an aggregate join between a small table and a large table.
 
 ---
 ## Perf. Hypothesis
 
+Our hypothesis for these tests, is the two system will perform on par with one another. In addition, because MySQL uses only Nested Loop Joins, we do think Postgres will generally be more performant than MySQL.
+
 ---
 ### Experiment Queries
 
-#### Query 1
+#### Query 1 - Basic SELECT
 ```sql
 SELECT * 
 FROM TENKTUP1 
 WHERE unique2 BETWEEN 3792 AND 18764;
 ```
 
-What perf metrics does this query test:
+Performance metrics this query aims to test:
 * Projection of large range of elements
-* Tests raw efficiency of plan, due to an index not having an effect (need to scan whole table)
+* Measure raw efficiency of plan, due to an index not having an effect when > 10% of data is needed to be searched. 
+
+Results:
+|------| Postgres  |   MySQL   |
+|------|:---------:|:---------:|
+| low  |  .862ms   |  .3ms     |
+| mid  |  .870ms   |  .4ms     |
+| high |  .924ms   |  .4ms     |
+| avg: |  .885ms   |  .36ms    |
+
 
 
 #### Query 2
@@ -100,16 +121,40 @@ SELECT two, ten, stringu1
 FROM TENKTUP1 
 WHERE unique1 BETWEEN 5400 AND 79999;
 ```
-What perf metrics does this query test:
-* 
+Performance metrics this query aims to test:
+* Project for few attributes over a smaller range
+* Measure raw efficiency of plan, due to an index not having an effect when > 10% of data is needed to be searched. 
+
+Results:
+|------| Postgres  |   MySQL   |
+|------|:---------:|:---------:|
+| low  |  .871ms   |  .3ms     |
+| mid  |  .949ms   |  .3ms     |
+| high |  .953ms   |  .3ms     |
+| avg: |  .924ms   |  .3ms     |
 
 
 #### Query 3
 ```sql
 SELECT * 
 FROM TENKTUP1, onemiltup 
-WHERE (TENKTUP1.unique2 = onemiltup .unique2);
+WHERE (TENKTUP1.unique2 = ONEMILTUP.unique2);
 ```
+
+Performance metrics this query aims to test:
+* Efficiency of `JOIN` operation between a small data set and large data set
+* Ability of DBMS to construct an effcient plan consistently
+* Measure if caching is happening for either DBMS/Efficiency of buffer pool.
+
+Results:
+|------| Postgres  |   MySQL   |
+|------|:---------:|:---------:|
+| low  |  1.38ms   |  1.5ms    |
+| mid  |  1.52ms   |  1.5ms    |
+| high |  1.56ms   |  1.6ms    |
+| avg: |  1.48ms   |  1.56ms   |
+
+> Note: For MySQL, the slowest query was the first which took 31.1ms to complete, whereas Postgres' slowest was 2.274ms on the fourth round.
 
 
 #### Query 4
@@ -117,6 +162,16 @@ WHERE (TENKTUP1.unique2 = onemiltup .unique2);
 SELECT * FROM TENKTUP1, onemiltup 
 WHERE (TENKTUP1.unique1 = onemiltup .unique1) AND (TENKTUP1.unique1<4532)
 ```
+
+Results:
+|------| Postgres  |   MySQL   |
+|------|:---------:|:---------:|
+| low  |  1.34ms   |  1.4ms    |
+| mid  |  1.35ms   |  1.5ms    |
+| high |  1.38ms   |  1.5ms    |
+| avg: |  1.36ms   |  1.46ms   |
+
+
 
 
 #### Query 5
@@ -126,6 +181,15 @@ FROM tenktup1 JOIN onemiltup on tenktup1.unique2 = onemiltup.odd100
 GROUP BY tenktup1.unique2
 ORDER BY tenktup1.unique2;
 ```
+Results:
+|------| Postgres  |   MySQL   |
+|------|:---------:|:---------:|
+| low  |  1.77ms   |  .8ms    |
+| mid  |  1.88ms   |  .9ms    |
+| high |  2.11ms   |  .9ms    |
+| avg: |  1.92ms   |  .86ms   |
 
+
+> Note: For MySQL, the slows was the first which took 2.92 seconds to complete, whereas Postgres' slowest was 4.724ms in the last round. 
 
 ## Lessons Learned
