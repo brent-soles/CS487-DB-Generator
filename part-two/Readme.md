@@ -9,7 +9,7 @@ Given our initial experiments with MySQL and Postgres, it was decided the best c
 The reason for leaving each system in their default configuration is because of the fact most side and hobby projects, and possibly startups, use these systems in their default state rather than fine tuning it before beginning to build any application. With our benchmark, we hope to examine which system may be better for building a performant application withouth having to adjust any settings. In addition, our benchmark aims to test the consistency of each platform by running each test in the benchmark multiple times.
 
 ## Hypothesis
-The hypothesis we have for the experiments in this benchmark is: MySQL and Postrgres should have similar performance for the simpler queries of the benchmark. However, once they systems are executing `JOIN` statements, we think Postgres will be more performant than MySQL, due to MySQL only implementing nested loop joins (See 'Join' in 'System Research' section for more information).
+The hypothesis we have for the experiments in this benchmark is: MySQL and Postrgres should have similar performance for the simpler queries of the benchmark. However, once they systems are executing `JOIN` statements, we think Postgres will be more performant than MySQL, due to MySQL only implementing nested loop joins (See 'Joins' in 'System Research' section for more information).
 
 ---
 # System Research
@@ -75,9 +75,9 @@ Digging through the MySQL docs, we were unable to land on a definite answer for 
 # Performance Experiment Design
 ## Overview
 
-For each of the tests, we wanted to see how the systems would perform for small, medium and large sets of data. Given some of the insights gained from the class about how databases behave when constructing query plans, we structured the query tests to first get a baseline as to how the respective system perform with *'smaller'* data tables, with each query getting more complex and more computationally expensive. The first two queries are basic `SELECT` statements, and three through five are focused on analyzing the performance of each systems `JOIN` algorithm.
+For each of the tests, we wanted to see how the systems would perform for small, medium and large sets of data. Given some of the insights gained from the class about how databases behave when constructing query plans, we structured the query tests to first get a baseline as to how the respective system perform with *'smaller'* relations, with each query getting more complex and computationally expensive. The first two queries are basic `SELECT` statements, and the rest are focused on analyzing the performance of each systems `JOIN` algorithm.
 
-The main part of this benchmark is centered around each systems `JOIN` execution. The reason we decided to have this benchmark focus mainly on `JOIN`'s, is becuase they are historically the most expensive query type to execute and because of the variance between the two systems in the way they implement joins.
+The main part of this benchmark is centered around each systems `JOIN` execution. The reason we decided to have this benchmark focus mainly on `JOIN`'s, is becuase they are historically the most expensive query type to execute and because of the variance between the two systems in the way they implement `JOIN`'s.
 
 ## Data Used In Tests
 
