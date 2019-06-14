@@ -107,7 +107,7 @@ Performance metrics this query aims to test:
 
 Results:
 
-| Times| Postgres  |   MySQL   |
+|Times | Postgres  |   MySQL   |
 |------|:---------:|:---------:|
 | low  |  .862ms   |  .3ms     |
 | mid  |  .870ms   |  .4ms     |
@@ -127,7 +127,8 @@ Performance metrics this query aims to test:
 * Measure raw efficiency of plan, due to an index not having an effect when > 10% of data is needed to be searched. 
 
 Results:
-|------| Postgres  |   MySQL   |
+
+|Times | Postgres  |   MySQL   |
 |------|:---------:|:---------:|
 | low  |  .871ms   |  .3ms     |
 | mid  |  .949ms   |  .3ms     |
@@ -148,7 +149,8 @@ Performance metrics this query aims to test:
 * Measure if caching is happening for either DBMS/Efficiency of buffer pool.
 
 Results:
-|------| Postgres  |   MySQL   |
+
+|Times | Postgres  |   MySQL   |
 |------|:---------:|:---------:|
 | low  |  1.38ms   |  1.5ms    |
 | mid  |  1.52ms   |  1.5ms    |
@@ -165,7 +167,8 @@ WHERE (TENKTUP1.unique1 = onemiltup .unique1) AND (TENKTUP1.unique1<4532)
 ```
 
 Results:
-|------| Postgres  |   MySQL   |
+
+| Times| Postgres  |   MySQL   |
 |------|:---------:|:---------:|
 | low  |  1.34ms   |  1.4ms    |
 | mid  |  1.35ms   |  1.5ms    |
@@ -183,7 +186,8 @@ GROUP BY tenktup1.unique2
 ORDER BY tenktup1.unique2;
 ```
 Results:
-|------| Postgres  |   MySQL   |
+
+|Times | Postgres  |   MySQL   |
 |------|:---------:|:---------:|
 | low  |  1.77ms   |  .8ms    |
 | mid  |  1.88ms   |  .9ms    |
